@@ -40,7 +40,7 @@ CONFIG = {
     'database': 'tcc_redeneuraldb'
 }
 
-CONN_STRING = (f"mysql+mys9qlconnector://{CONFIG['user']}:{CONFIG['password']}"
+CONN_STRING = (f"mysql+mysqlconnector://{CONFIG['user']}:{CONFIG['password']}"
                f"@{CONFIG['host']}:{CONFIG['port']}/{CONFIG['database']}")
 
 def carregar_dados():
@@ -99,11 +99,11 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
         verbose=1
     )
 
-    salvar_metricas_em_arquivo(history, "historico_metricas_mensais.csv")
+    salvar_metricas_em_arquivo(history, "Dados/historico_metricas_mensais.csv")
 
     return model, history
 
-def salvar_metricas_em_arquivo(history, caminho_arquivo="historico_metricas.csv"):
+def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas.csv"):
     ultimos = 10
     metricas = {
         'epoch': list(range(len(history.history['loss']) - ultimos, len(history.history['loss']))),
@@ -148,7 +148,7 @@ def obter_estados_no_banco(df):
 def obter_meses_no_banco(df):
     return sorted(df['Mes'].unique())
 
-def salvar_previsoes_em_csv(lista_previsoes, caminho_arquivo="previsoes_mensais.csv"):
+def salvar_previsoes_em_csv(lista_previsoes, caminho_arquivo="Dados/previsoes_mensais.csv"):
     df_previsoes = pd.DataFrame(lista_previsoes)
     df_previsoes['timestamp'] = pd.Timestamp.now()
 
