@@ -104,7 +104,7 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
     return model, history
 
 def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas.csv"):
-    ultimos = 10
+    ultimos = 25
     metricas = {
         'epoch': list(range(len(history.history['loss']) - ultimos, len(history.history['loss']))),
         'loss': history.history['loss'][-ultimos:],

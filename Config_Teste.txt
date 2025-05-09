@@ -1,0 +1,19 @@
+Teste Cópia - 
+Camadas - 
+Dropout - 
+L2 - 
+Learning_rate - 
+Patience - 
+Min_delta - 
+Epochs - 
+Batch_size - 
+
+Teste 1 - 
+Camadas - 256, 128, 64
+Dropout - 0.3, 0.3, 0.3
+L2 - 1e-4, 1e-4, 1e-4
+Learning_rate - 0.001
+Patience - 20
+Min_delta - 0.001
+Epochs - 150
+Batch_size - 32
