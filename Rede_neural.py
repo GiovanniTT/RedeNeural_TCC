@@ -99,11 +99,11 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
         verbose=1
     )
 
-    salvar_metricas_em_arquivo(history, "Dados/historico_metricas_mensais.csv")
+    salvar_metricas_em_arquivo(history, "Dados/historico_metricas_mensais_configA.csv")
 
     return model, history
 
-def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas.csv"):
+def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas_mensais_configA.csv"):
     ultimos = 25
     metricas = {
         'epoch': list(range(len(history.history['loss']) - ultimos, len(history.history['loss']))),
@@ -197,7 +197,7 @@ def fazer_previsoes_mensais(model, scaler_X, scaler_y, encoder_columns, df, ano_
                 "Mortes_Previstas": mortes
             })
 
-    salvar_previsoes_em_csv(previsoes, "previsoes_mensais.csv")
+    salvar_previsoes_em_csv(previsoes, "Dados/previsoes_mensais.csv")
 
 def plotar_grafico_perda(history):
     plt.figure(figsize=(10, 6))

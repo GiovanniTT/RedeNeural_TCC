@@ -61,4 +61,3 @@ Min_delta - 0.001
 Epochs - 150
 Batch_size - 16
 
-val_loss menor que o loss
