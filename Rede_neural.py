@@ -76,24 +76,24 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
     x_train, x_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=0.2, random_state=42)
 
     model = Sequential([
-        Dense(256, input_dim=input_dim, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(64, input_dim=input_dim, activation='relu', kernel_regularizer=l2(1e-4)),
         Dropout(0.3),
-        Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
-        Dropout(0.3),
-        Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(32, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dropout(0.4),
+        Dense(16, activation='relu', kernel_regularizer=l2(1e-4)),
         Dropout(0.3),
         Dense(2, activation='linear')
     ])
 
-    model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
+    model.compile(optimizer=Adam(learning_rate=0.0003), loss='mse', metrics=['mae'])
 
-    early_stopping = EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=True, verbose=1, min_delta=0.001)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1, min_delta=0.001)
     checkpoint = ModelCheckpoint('melhor_modelo_mensal.keras', monitor='val_loss', save_best_only=True, verbose=1)
 
     history = model.fit(
         x_train, y_train,
         epochs=150,
-        batch_size=32,
+        batch_size=16,
         validation_data=(x_test, y_test),
         callbacks=[early_stopping, checkpoint],
         verbose=1
