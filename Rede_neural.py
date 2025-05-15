@@ -58,7 +58,7 @@ def carregar_dados():
         logging.error(f"Erro ao carregar dados: {e}")
         return None
 
-def preprocessar_dados(df):
+def processar_dados(df):
     try:
         if 'Mes' not in df.columns:
             logging.error("Coluna 'Mes' não encontrada nos dados.")
@@ -88,7 +88,7 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
     model.compile(optimizer=Adam(learning_rate=0.0003), loss='mse', metrics=['mae'])
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1, min_delta=0.001)
-    checkpoint = ModelCheckpoint('melhor_modelo_mensal.keras', monitor='val_loss', save_best_only=True, verbose=1)
+    checkpoint = ModelCheckpoint('melhor_modelo_mensal.csv', monitor='val_loss', save_best_only=True, verbose=1)
 
     history = model.fit(
         x_train, y_train,

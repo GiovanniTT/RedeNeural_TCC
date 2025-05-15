@@ -38,7 +38,17 @@ Min_delta - 0.001
 Epochs - 150
 Batch_size - 16
 
-Teste 3 - 
+Teste 3- 
+Camadas -  64, 32, 16
+Dropout - 0.3, 0.4, 0.3
+L2 - 1e-4, 1e-4, 1e-4
+Learning_rate - 0.0003
+Patience - 10
+Min_delta - 0.001
+Epochs - 150
+Batch_size - 16
+
+Teste 4 - 
 Camadas -  128, 64, 32
 Dropout - 0.3, 0.3, 0.3
 L2 - 1e-4, 1e-4, 1e-4
@@ -50,14 +60,3 @@ Batch_size - 16
 
 SP: erro médio ≈ 14.556 casos, em uma faixa de até 251.725 → erro ≈ 5,8%
 RS: erro médio ≈ 1.757 casos, em uma faixa de até 29.929 → erro ≈ 5,9%
-
-Teste 4 - 
-Camadas -  64, 32, 16
-Dropout - 0.3, 0.4, 0.3
-L2 - 1e-4, 1e-4, 1e-4
-Learning_rate - 0.0003
-Patience - 10
-Min_delta - 0.001
-Epochs - 150
-Batch_size - 16
-
