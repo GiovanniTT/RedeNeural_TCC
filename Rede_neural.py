@@ -76,34 +76,34 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
     x_train, x_test, y_train, y_test = train_test_split(X_scaled, y_scaled, test_size=0.2, random_state=42)
 
     model = Sequential([
-        Dense(64, input_dim=input_dim, activation='relu', kernel_regularizer=l2(1e-4)),
-        Dropout(0.3),
-        Dense(32, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dense(256, input_dim=input_dim, activation='relu', kernel_regularizer=l2(1e-4)),
         Dropout(0.4),
-        Dense(16, activation='relu', kernel_regularizer=l2(1e-4)),
-        Dropout(0.3),
+        Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dropout(0.4),
+        Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
+        Dropout(0.4),
         Dense(2, activation='linear')
     ])
 
-    model.compile(optimizer=Adam(learning_rate=0.0003), loss='mse', metrics=['mae'])
+    model.compile(optimizer=Adam(learning_rate=0.0006), loss='mse', metrics=['mae'])
 
-    early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1, min_delta=0.001)
-    checkpoint = ModelCheckpoint('melhor_modelo_mensal.csv', monitor='val_loss', save_best_only=True, verbose=1)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1, min_delta=0.001)
+    checkpoint = ModelCheckpoint('Dados/melhor_modelo_mensal.keras', monitor='val_loss', save_best_only=True, verbose=1)
 
     history = model.fit(
         x_train, y_train,
-        epochs=150,
-        batch_size=16,
+        epochs=200,
+        batch_size=64,
         validation_data=(x_test, y_test),
         callbacks=[early_stopping, checkpoint],
         verbose=1
     )
 
-    salvar_metricas_em_arquivo(history, "Dados/historico_metricas_mensais_configA.csv")
+    salvar_metricas_em_arquivo(history, "Dados/historico_metricas_mensais_configB.csv")
 
     return model, history
 
-def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas_mensais_configA.csv"):
+def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas_mensais_configB.csv"):
     ultimos = 25
     metricas = {
         'epoch': list(range(len(history.history['loss']) - ultimos, len(history.history['loss']))),
@@ -215,7 +215,7 @@ def executar_codigo():
     if df is None:
         return
 
-    X, y, encoder_columns = preprocessar_dados(df)
+    X, y, encoder_columns = processar_dados(df)
     if X is None or y is None:
         return
 
