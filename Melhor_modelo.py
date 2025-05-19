@@ -11,7 +11,7 @@ HISTORICO_A_PATH = "Dados/historico_metricas_mensais_configA.csv"
 HISTORICO_B_PATH = "Dados/historico_metricas_mensais_configB.csv"
 
 def comparar_historicos():
-    print("\n🔍 Comparando arquivos de histórico...")
+    print("\nComparando arquivos de histórico...")
     
     # Carregar ambos os históricos se existirem
     historicos = {}
@@ -25,16 +25,16 @@ def comparar_historicos():
                 print(f"- Registros: {len(df)}")
                 print(f"- Métricas disponíveis: {list(df.columns)}")
             except Exception as e:
-                print(f"\n❌ Erro ao carregar {path}: {e}")
+                print(f"\nErro ao carregar {path}: {e}")
         else:
-            print(f"\n⚠ Arquivo {path} não encontrado")
+            print(f"\nArquivo {path} não encontrado")
     
     # Comparação detalhada se ambos existirem
     if len(historicos) == 2:
-        print("\n" + "="*50 + "\n📊 Análise Comparativa\n" + "="*50)
+        print("\n" + "="*50 + "\nAnálise Comparativa\n" + "="*50)
         
         # 1. Comparação básica de métricas
-        print("\n🔢 Estatísticas Comparativas:")
+        print("\nEstatísticas Comparativas:")
         for metrica in historicos['Configuração A'].columns:
             print(f"\nMétrica: {metrica}")
             print("Config A | Config B")
@@ -44,7 +44,7 @@ def comparar_historicos():
             print(f"{historicos['Configuração A'][metrica].max():.4f} | {historicos['Configuração B'][metrica].max():.4f} (Máximo)")
         
         # 2. Comparação visual simplificada
-        print("\n📈 Tendências:")
+        print("\nTendências:")
         for metrica in historicos['Configuração A'].columns:
             diff = historicos['Configuração A'][metrica].mean() - historicos['Configuração B'][metrica].mean()
             if diff > 0:
@@ -65,27 +65,27 @@ def comparar_historicos():
             print(f"- {metrica}: Config {config}")
 
 def verificar_recursos():
-    print("\n" + "="*50 + "\n🔧 Verificando recursos adicionais\n" + "="*50)
+    print("\n" + "="*50 + "\nVerificando recursos adicionais\n" + "="*50)
     
     # Verificar scalers e modelo (mantido da versão original)
     for scaler_path, nome in [(SCALER_X_PATH, "Scaler X"), (SCALER_Y_PATH, "Scaler y")]:
         if os.path.exists(scaler_path):
             try:
                 joblib.load(scaler_path)
-                print(f"\n✅ {nome} encontrado em {scaler_path}")
+                print(f"\n {nome} encontrado em {scaler_path}")
             except Exception as e:
-                print(f"\n❌ Erro ao carregar {scaler_path}: {e}")
+                print(f"\n Erro ao carregar {scaler_path}: {e}")
         else:
-            print(f"\n⚠ {nome} não encontrado em {scaler_path}")
+            print(f"\n {nome} não encontrado em {scaler_path}")
     
     if os.path.exists(MODEL_PATH):
         try:
             load_model(MODEL_PATH)
-            print(f"\n✅ Modelo encontrado em {MODEL_PATH}")
+            print(f"\n Modelo encontrado em {MODEL_PATH}")
         except Exception as e:
-            print(f"\n❌ Erro ao carregar modelo: {e}")
+            print(f"\n Erro ao carregar modelo: {e}")
     else:
-        print(f"\n⚠ Modelo não encontrado em {MODEL_PATH}")
+        print(f"\n Modelo não encontrado em {MODEL_PATH}")
 
 if __name__ == "__main__":
     comparar_historicos()

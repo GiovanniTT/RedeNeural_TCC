@@ -12,12 +12,12 @@ try:
     train_loss = melhor_epoca['loss']
     
     print("═"*50)
-    print(f"🚀 MELHOR ÉPOCA: {epoch_num}")
+    print(f"MELHOR ÉPOCA: {epoch_num}")
     print("═"*50)
-    print(f"📉 Menor val_loss: {val_loss_min:.6f}")
-    print(f"📊 MSE Treino correspondente: {train_loss:.6f}")
-    print(f"🔄 Diferença Treino-Validação: {abs(train_loss-val_loss_min):.6f}")
-    print("\n📌 Métricas completas:")
+    print(f"Menor val_loss: {val_loss_min:.6f}")
+    print(f"MSE Treino correspondente: {train_loss:.6f}")
+    print(f"Diferença Treino-Validação: {abs(train_loss-val_loss_min):.6f}")
+    print("\nMétricas completas:")
     print(melhor_epoca.to_string())
 
     # Gráfico de evolução
@@ -39,7 +39,7 @@ try:
     plt.show()
 
 except FileNotFoundError:
-    print("❌ Arquivo não encontrado. Verifique o caminho:")
+    print("Arquivo não encontrado. Verifique o caminho:")
     print("Caminho atual tentado: Dados/historico_metricas_mensais_configA.csv")
 except Exception as e:
-    print(f"❌ Erro inesperado: {str(e)}")
+    print(f"Erro inesperado: {str(e)}")
