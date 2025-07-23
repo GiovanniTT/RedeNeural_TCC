@@ -37,7 +37,7 @@ CONFIG = {
     'user': 'root',
     'password': 'Paralelepipedo123',
     'port': 3306,
-    'database': 'tcc_redeneuraldb'
+    'database': 'dengue_db'
 }
 
 CONN_STRING = (f"mysql+mysqlconnector://{CONFIG['user']}:{CONFIG['password']}"
@@ -47,7 +47,7 @@ def carregar_dados():
     try:
         engine = create_engine(CONN_STRING)
         with engine.connect() as conn:
-            df = pd.read_sql("SELECT * FROM tcc_redeneural", conn)
+            df = pd.read_sql("SELECT * FROM dengue_db.dengue_dados", conn)
         engine.dispose()
         if df.empty:
             logging.warning("Nenhum dado encontrado no banco.")
@@ -60,13 +60,13 @@ def carregar_dados():
 
 def processar_dados(df):
     try:
-        if 'Mes' not in df.columns:
+        if 'mes' not in df.columns:
             logging.error("Coluna 'Mes' não encontrada nos dados.")
             return None, None, None
 
-        df = df[['Ano', 'Mes', 'Estado', 'Mortes', 'Casos', 'Temperatura', 'Precipitacao']]
-        X = pd.get_dummies(df[['Ano', 'Mes', 'Estado']], columns=['Estado', 'Mes'])
-        y = df[['Casos', 'Mortes']]
+        df = df[['ano', 'mes', 'estado', 'mortes', 'casos', 'temperatura', 'precipitacao']]
+        X = pd.get_dummies(df[['ano', 'mes', 'estado', 'mortes']], columns=['estado', 'mes'])
+        y = df[['casos']]
         return X, y, X.columns
     except KeyError as e:
         logging.error(f"Erro no pré-processamento: Coluna ausente {e}")
@@ -82,7 +82,7 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
         Dropout(0.4),
         Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
         Dropout(0.4),
-        Dense(2, activation='linear')
+        Dense(1, activation='linear')  # Saída para 1 variável: Casos
     ])
 
     model.compile(optimizer=Adam(learning_rate=0.0006), loss='mse', metrics=['mae'])
@@ -130,23 +130,30 @@ def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metrica
     df_final.to_csv(caminho_arquivo, index=False)
     logging.info(f"Últimas métricas salvas em {caminho_arquivo}")
 
-def criar_entrada_mensal(ano, mes, estado, encoder_columns):
+def criar_entrada_mensal(ano, mes, estado, mortes, encoder_columns):
     entrada = pd.DataFrame(0, index=[0], columns=encoder_columns)
-    entrada['Ano'] = ano
-    col_estado = f"Estado_{estado}"
-    col_mes = f"Mes_{mes}"
-
+    
+    # Atribui ano e mortes, se as colunas existirem no encoder
+    if 'ano' in entrada.columns:
+        entrada['ano'] = ano
+    if 'mortes' in entrada.columns:
+        entrada['mortes'] = mortes
+    
+    col_estado = f"estado_{estado}"
+    col_mes = f"mes_{mes}"
+    
     if col_estado in entrada.columns:
         entrada[col_estado] = 1
     if col_mes in entrada.columns:
         entrada[col_mes] = 1
+        
     return entrada
 
 def obter_estados_no_banco(df):
-    return df['Estado'].unique()
+    return df['estado'].unique()
 
 def obter_meses_no_banco(df):
-    return sorted(df['Mes'].unique())
+    return sorted(df['mes'].unique())
 
 def salvar_previsoes_em_csv(lista_previsoes, caminho_arquivo="Dados/previsoes_mensais.csv"):
     df_previsoes = pd.DataFrame(lista_previsoes)
@@ -170,7 +177,7 @@ def fazer_previsoes_mensais(model, scaler_X, scaler_y, encoder_columns, df, ano_
 
     for estado in sorted(estados_no_banco):
         for mes in meses_no_banco:
-            entrada_mensal = criar_entrada_mensal(ano_previsao, mes, estado, encoder_columns)
+            entrada_mensal = criar_entrada_mensal(ano_previsao, mes, estado, 0, encoder_columns)
 
             if entrada_mensal.isnull().values.any():
                 logging.warning(f"Estado '{estado}' ou mês '{mes}' não possui coluna correspondente.")
@@ -186,18 +193,53 @@ def fazer_previsoes_mensais(model, scaler_X, scaler_y, encoder_columns, df, ano_
             previsao = scaler_y.inverse_transform(previsao_normalizada)
 
             casos = int(previsao[0][0])
-            mortes = int(previsao[0][1])
-            print(f"{estado} - {mes}/{ano_previsao}: Casos: {casos:,}, Mortes: {mortes:,}")
+            print(f"{estado} - {mes}/{ano_previsao}: Casos: {casos:,}")
 
             previsoes.append({
-                "Ano": ano_previsao,
-                "Mes": mes,
-                "Estado": estado,
-                "Casos_Previstos": casos,
-                "Mortes_Previstas": mortes
+                "ano": ano_previsao,
+                "mes": mes,
+                "estado": estado,
+                "casos_Previstos": casos,
             })
 
     salvar_previsoes_em_csv(previsoes, "Dados/previsoes_mensais.csv")
+    
+def salvar_tempo_execucao_csv(tempo_execucao, caminho_arquivo="Dados/tempo_execucao.csv"):
+    timestamp_str = pd.Timestamp.now()
+    dados = {
+        'data_hora': [timestamp_str],
+        'tempo_execucao_segundos': [tempo_execucao]
+    }
+    df = pd.DataFrame(dados)
+
+    if os.path.exists(caminho_arquivo):
+        df_antigo = pd.read_csv(caminho_arquivo)
+        df_final = pd.concat([df_antigo, df], ignore_index=True)
+    else:
+        df_final = df
+
+    df_final.to_csv(caminho_arquivo, index=False)
+    logging.info(f"Tempo de execução salvo em {caminho_arquivo}")
+    
+def salvar_metricas_execucao_csv(mse, mae, arquivo_metricas="Dados/metricas.csv"):
+    dados = {
+        'mse_teste': [mse],
+        'mae_teste': [mae],
+    }
+    df = pd.DataFrame(dados)
+
+    if os.path.exists(arquivo_metricas):
+        try:
+            df_antigo = pd.read_csv(arquivo_metricas)
+            df_final = pd.concat([df_antigo, df], ignore_index=True)
+        except pd.errors.EmptyDataError:
+            logging.warning(f"Arquivo {arquivo_metricas} está vazio. Será sobrescrito.")
+            df_final = df
+    else:
+        df_final = df
+
+    df_final.to_csv(arquivo_metricas, index=False)
+    logging.info(f"Métricas de desempenho salvas em {arquivo_metricas}")
 
 def plotar_grafico_perda(history):
     plt.figure(figsize=(10, 6))
@@ -211,6 +253,8 @@ def plotar_grafico_perda(history):
     plt.show()
 
 def executar_codigo():
+    start_time = time.time()  # <- iniciar contagem aqui
+    
     df = carregar_dados()
     if df is None:
         return
@@ -226,26 +270,27 @@ def executar_codigo():
     y_scaled = scaler_y.fit_transform(y)
 
     model, history = criar_e_treinar_modelo(X_scaled, y_scaled, input_dim=X.shape[1])
+    
+    # Calcular métricas gerais
+    score = model.evaluate(X_scaled, y_scaled, verbose=0)
+    final_mse = score[0]
+    final_mae = score[1]
+
+    elapsed_time = time.time() - start_time  # <- calcula antes de salvar
+    print(f"\nTempo de execução: {elapsed_time:.2f} segundos.")
+
+    salvar_metricas_execucao_csv(final_mse, final_mae, arquivo_metricas="Dados/metricas.csv")
+    
+    salvar_tempo_execucao_csv(elapsed_time, caminho_arquivo="Dados/tempo_execucao.csv")
 
     fazer_previsoes_mensais(model, scaler_X, scaler_y, encoder_columns, df, ano_previsao=2024)
     plotar_grafico_perda(history)
 
 if __name__ == "__main__":
-    execucoes = 0
-    max_execucoes = 25
-    best_val_loss = float('inf')
-    best_model = None
+    start_time = time.time()
+    print(f"\n=== Execução única ===")
+    executar_codigo()
+    elapsed_time = time.time() - start_time
+    print(f"\nTempo de execução: {elapsed_time:.2f} segundos.")
 
-    while execucoes < max_execucoes:
-        start_time = time.time()
-        print(f"\n=== Execução {execucoes + 1} de {max_execucoes} ===")
-        executar_codigo()
-        elapsed_time = time.time() - start_time
-        print(f"\nTempo de execução: {elapsed_time:.2f} segundos.")
-
-        execucoes += 1
-
-        if execucoes < max_execucoes:
-            time.sleep(60)
-
-    print("\nProcesso concluído após 25 execuções.")
+    executar_codigo()
