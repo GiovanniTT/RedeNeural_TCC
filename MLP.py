@@ -65,7 +65,7 @@ def processar_dados(df):
             return None, None, None
 
         df = df[['ano', 'mes', 'estado', 'mortes', 'casos', 'temperatura', 'precipitacao']]
-        X = pd.get_dummies(df[['ano', 'mes', 'estado', 'mortes']], columns=['estado', 'mes'])
+        X = pd.get_dummies(df[['ano', 'mes', 'estado', 'mortes', 'temperatura', 'precipitacao']], columns=['estado', 'mes'])
         y = df[['casos']]
         return X, y, X.columns
     except KeyError as e:
@@ -102,6 +102,17 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
     salvar_metricas_em_arquivo(history, "Dados/historico_metricas_mensais_configB.csv")
 
     return model, history
+
+def salvar_dados_normalizados(X_scaled, y_scaled, encoder_columns, caminho_x="Dados/amostra_X_normalizado.xlsx", caminho_y="Dados/amostra_Y_normalizado.xlsx"):
+    
+    df_x = pd.DataFrame(X_scaled[:5], columns=encoder_columns)
+    df_y = pd.DataFrame(y_scaled[:5], columns=['casos_normalizados'])
+    
+    df_x.to_excel(caminho_x, index=False)
+    df_y.to_excel(caminho_y, index=False)
+    
+    logging.info(f"Amostra das variáveis de entrada normalizadas salva em {caminho_x}")
+    logging.info(f"Amostra das variáveis de saída normalizadas salva em {caminho_y}")
 
 def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metricas_mensais_configB.csv"):
     ultimos = 25
@@ -213,8 +224,12 @@ def salvar_tempo_execucao_csv(tempo_execucao, caminho_arquivo="Dados/tempo_execu
     df = pd.DataFrame(dados)
 
     if os.path.exists(caminho_arquivo):
-        df_antigo = pd.read_csv(caminho_arquivo)
-        df_final = pd.concat([df_antigo, df], ignore_index=True)
+        try:
+            df_antigo = pd.read_csv(caminho_arquivo)
+            df_final = pd.concat([df_antigo, df], ignore_index=True)
+        except pd.errors.EmptyDataError:
+            logging.warning(f"Arquivo {caminho_arquivo} está vazio. Será sobrescrito.")
+            df_final = df
     else:
         df_final = df
 
@@ -284,7 +299,10 @@ def executar_codigo():
     salvar_tempo_execucao_csv(elapsed_time, caminho_arquivo="Dados/tempo_execucao.csv")
 
     fazer_previsoes_mensais(model, scaler_X, scaler_y, encoder_columns, df, ano_previsao=2024)
+    
     plotar_grafico_perda(history)
+    
+    salvar_dados_normalizados(X_scaled, y_scaled, encoder_columns)
 
 if __name__ == "__main__":
     start_time = time.time()
