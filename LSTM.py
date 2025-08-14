@@ -211,14 +211,15 @@ def criar_modelo_lstm(input_shape):
     model = Sequential([
         Input(shape=input_shape),
         Bidirectional(LSTM(128, return_sequences=True, kernel_regularizer=l2(1e-4))),
-        Dropout(0.3),
+        Dropout(0.5),
         Bidirectional(LSTM(64, kernel_regularizer=l2(1e-4))),
-        Dropout(0.3),
+        Dropout(0.4),
         Dense(32, activation='relu'),
+        Dropout(0.3),
         Dense(1, activation='linear')
     ])
     
-    model.compile(optimizer=Adam(learning_rate=0.001), 
+    model.compile(optimizer=Adam(learning_rate=0.0005), 
                  loss='mse', 
                  metrics=['mae'])
     
@@ -233,7 +234,7 @@ def criar_e_treinar_modelo(X, y, input_shape):
 
     early_stopping = EarlyStopping(
         monitor='val_loss', 
-        patience=20, 
+        patience=15, 
         restore_best_weights=True, 
         verbose=1, 
         min_delta=0.001,
@@ -248,7 +249,7 @@ def criar_e_treinar_modelo(X, y, input_shape):
     history = model.fit(
         x_train, y_train,
         epochs=150,
-        batch_size=32,
+        batch_size=64,
         validation_data=(x_test, y_test),
         callbacks=[early_stopping, checkpoint],
         verbose=1

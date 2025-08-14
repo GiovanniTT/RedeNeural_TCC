@@ -92,8 +92,8 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
 
     history = model.fit(
         x_train, y_train,
-        epochs=200,
-        batch_size=64,
+        epochs=220,
+        batch_size=128,
         validation_data=(x_test, y_test),
         callbacks=[early_stopping, checkpoint],
         verbose=1
