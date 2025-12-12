@@ -157,7 +157,7 @@ def plotar_grafico_perda(history):
     plt.title('Histórico de Perda', fontsize=14)
     plt.xlabel('Época')
     plt.ylabel('MSE')
-    plt.legend()
+    plt.legend()    
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.show()
 

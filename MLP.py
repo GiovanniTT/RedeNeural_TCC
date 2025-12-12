@@ -77,23 +77,23 @@ def criar_e_treinar_modelo(X_scaled, y_scaled, input_dim):
 
     model = Sequential([
         Dense(256, input_dim=input_dim, activation='relu', kernel_regularizer=l2(1e-4)),
-        Dropout(0.4),
+        Dropout(0.2),
         Dense(128, activation='relu', kernel_regularizer=l2(1e-4)),
-        Dropout(0.4),
+        Dropout(0.2),
         Dense(64, activation='relu', kernel_regularizer=l2(1e-4)),
-        Dropout(0.4),
-        Dense(1, activation='linear')  # Saída para 1 variável: Casos
+        Dropout(0.2),
+        Dense(1, activation='linear')  # Saída linear (vamos corrigir no pós-processamento)
     ])
 
-    model.compile(optimizer=Adam(learning_rate=0.0006), loss='mse', metrics=['mae'])
+    model.compile(optimizer=Adam(learning_rate=0.0005), loss='mse', metrics=['mae'])
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True, verbose=1, min_delta=0.001)
     checkpoint = ModelCheckpoint('Dados/melhor_modelo_mensal.keras', monitor='val_loss', save_best_only=True, verbose=1)
 
     history = model.fit(
         x_train, y_train,
-        epochs=220,
-        batch_size=128,
+        epochs=150,
+        batch_size=32,
         validation_data=(x_test, y_test),
         callbacks=[early_stopping, checkpoint],
         verbose=1
@@ -144,7 +144,6 @@ def salvar_metricas_em_arquivo(history, caminho_arquivo="Dados/historico_metrica
 def criar_entrada_mensal(ano, mes, estado, mortes, encoder_columns):
     entrada = pd.DataFrame(0, index=[0], columns=encoder_columns)
     
-    # Atribui ano e mortes, se as colunas existirem no encoder
     if 'ano' in entrada.columns:
         entrada['ano'] = ano
     if 'mortes' in entrada.columns:
@@ -203,7 +202,8 @@ def fazer_previsoes_mensais(model, scaler_X, scaler_y, encoder_columns, df, ano_
             previsao_normalizada = model.predict(entrada_normalizada)
             previsao = scaler_y.inverse_transform(previsao_normalizada)
 
-            casos = int(previsao[0][0])
+            # Garantir que não teremos negativos
+            casos = max(0, int(previsao[0][0]))
             print(f"{estado} - {mes}/{ano_previsao}: Casos: {casos:,}")
 
             previsoes.append({
@@ -268,7 +268,7 @@ def plotar_grafico_perda(history):
     plt.show()
 
 def executar_codigo():
-    start_time = time.time()  # <- iniciar contagem aqui
+    start_time = time.time()
     
     df = carregar_dados()
     if df is None:
@@ -286,12 +286,11 @@ def executar_codigo():
 
     model, history = criar_e_treinar_modelo(X_scaled, y_scaled, input_dim=X.shape[1])
     
-    # Calcular métricas gerais
     score = model.evaluate(X_scaled, y_scaled, verbose=0)
     final_mse = score[0]
     final_mae = score[1]
 
-    elapsed_time = time.time() - start_time  # <- calcula antes de salvar
+    elapsed_time = time.time() - start_time
     print(f"\nTempo de execução: {elapsed_time:.2f} segundos.")
 
     salvar_metricas_execucao_csv(final_mse, final_mae, arquivo_metricas="Dados/metricas.csv")

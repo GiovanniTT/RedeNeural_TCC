@@ -29,7 +29,6 @@ bars1 = plt.bar(x - width/2, df_metricas['MSE'], width, label='MSE', color='red'
 bars2 = plt.bar(x + width/2, df_metricas['MAE'], width, label='MAE', color='blue', edgecolor='black')
 
 # Adicionar detalhes
-plt.title('Gráfico 1 - Comparação de Erros entre MLP e LSTM', fontsize=14, pad=20)
 plt.ylabel('Valor do Erro', fontsize=12)
 plt.xticks(x, df_metricas['Modelo'], fontsize=12)
 plt.legend(fontsize=12)

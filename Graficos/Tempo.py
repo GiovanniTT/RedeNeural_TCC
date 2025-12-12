@@ -34,7 +34,6 @@ for bar in bars.patches:
                   fontsize=12)
 
 # Títulos e labels
-plt.title('Gráfico 2 – Comparação do tempo de Execução dos Modelos', fontsize=16, weight='bold')
 plt.xlabel('Modelos', fontsize=14)
 plt.ylabel('Tempo de Execução (segundos)', fontsize=14)
 
