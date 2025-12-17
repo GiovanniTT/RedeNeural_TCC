@@ -1,3 +1,5 @@
+## ANÁLISE COMPARATIVA DE MODELOS MLP E LSTM EM PROCESSO DE PREDIÇÃO DE CASOS DE DENGUE NO BRASIL
+
 Este repositório contém o código desenvolvido no Trabalho de Conclusão de Curso (TCC) que realiza uma análise comparativa entre modelos de Redes Neurais Artificiais MLP (Multilayer Perceptron) e LSTM (Long Short-Term Memory) aplicados à predição de casos de dengue no Brasil, utilizando dados epidemiológicos e climáticos.
 
 📌 Objetivo do Projeto
